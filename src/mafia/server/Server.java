@@ -34,6 +34,16 @@ class ServerManager
 		receiveThreadList = new ArrayList<Thread>();
 	}
 	
+	public List<UserVO> getUserList()
+	{
+		if(userList != null && userList.size() > 0)
+		{
+			return userList;
+		}
+		
+		return new ArrayList<UserVO>();
+	}
+	
 	public boolean isRoomFull()
 	{
 		//방이 꽉 찼나 boolean값 리턴
@@ -132,11 +142,12 @@ class ServerManager
 	{
 		if(userList != null && userList.size() > 0)
 		{
+			System.out.println("[sendMsgAll] _msg >>> : " + _msg);
+			
 			for(int i=0; i<userList.size(); i++)
 			{
 				try 
 				{
-					System.out.println("[sendMsgAll] _msg >>> : " + _msg);
 					BufferedWriter bw = new BufferedWriter
 							(new OutputStreamWriter(userList.get(i).getM_socket().getOutputStream()));
 					bw.write(_msg + "\n");
@@ -203,12 +214,54 @@ class ServerManager
 						{
 							if(Command.isUserCommand(msg))
 							{
+								System.out.println("유저명령어 발견");
+								System.out.println("id >>> : " + id);
+								/*
+								 ex) msg : /살인 [닉네임1]
+								 	 cmd : /살인
+								 	 arg : [닉네임1]
+								*/
 								
+								String cmd = msg.split(" ")[0];
+								String arg = msg.split(" ")[1];
+				
+								if(cmd.equals("/대화종료"))
+								{
+									Game.getInstance().endTalk();
+								}
+								else if(cmd.equals("/투표종료"))
+								{
+									Game.getInstance().endVote();
+								}
+								else if(cmd.equals("/투표"))
+								{
+									Game.getInstance().vote(id, arg);
+								}
+								else if(cmd.equals("/치료"))
+								{
+									Game.getInstance().heal(id, arg);
+								}
+								else if(cmd.equals("/조사"))
+								{
+									Game.getInstance().investigate(id, arg);
+								}
+								else if(cmd.equals("/살인"))
+								{
+									Game.getInstance().murder(id, arg);
+								}
 							}
 							else
 							{
-								String text = "[" + id + "]" + " : " + msg; // >>> [닉네임] : (채팅내용)
-								sendMsgAll(text);
+								//유저가 서버커멘드를 입력해서 게임을 조종할 수 있기때문에 걸러줌
+								if(!Command.isServerCommand(msg)) 
+								{
+									String text = "[" + id + "]" + " : " + msg; // >>> [닉네임] : (채팅내용)
+									sendMsgAll(text);
+								}
+								else
+								{
+									System.out.println("[ReceiverThread.run()] error >>> : 유저가 서버커멘드를 입력함");
+								}
 							}
 						}
 					}
@@ -227,7 +280,6 @@ public class Server
 {
 	//실제 게임을 돌리는 역할을 하는 서버매니저와 game을 싱글톤으로 관리
 	private static ServerManager sm = new ServerManager();
-	private static Game game = new Game();
 	
 	public static ServerManager getServerManager()
 	{
@@ -280,13 +332,8 @@ public class Server
 		try 
 		{
 			waitUser(sm, port);
-			//이 아래 로직이 실행된다는건 유저가 다 들어왔다는 뜻임. 즉 게임 시작할 준비 되었음을 의미함
-			if(game == null)
-			{
-				game = new Game();
-			}
-			
-			game.runGame();
+			//이 아래 로직이 실행된다는건 유저가 다 들어왔다는 뜻임. 즉 게임 시작할 준비 되었음을 의미함			
+			Game.getInstance().runGame();
 		} 
 		catch (Exception e)
 		{

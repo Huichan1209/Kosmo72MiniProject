@@ -140,7 +140,7 @@ public class Client
 						if(Command.isServerCommand(msg))
 						{
 							//msg가 명령어라면
-							System.out.println("명령어 발견");
+							System.out.println("서버명령어 발견");
 							String cmd = msg.split(" ")[0];
 							if(cmd.equals("/낮"))
 							{
