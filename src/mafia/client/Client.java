@@ -231,27 +231,10 @@ public class Client
 			bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 			bw.write(msg + "\n");
 			bw.flush();
-			bw.close();
-			bw = null;
 		}
 		catch (Exception e) 
 		{
 			System.out.println("error >>> : " + e);
-		}
-		finally
-		{
-			if(bw != null)
-			{
-				try
-				{
-					bw.close();
-					bw = null;
-				}
-				catch(Exception ignore)
-				{
-					
-				}
-			}
 		}
 	}
 	

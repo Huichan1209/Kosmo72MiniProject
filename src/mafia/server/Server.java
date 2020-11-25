@@ -2,6 +2,7 @@ package mafia.server;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.InetAddress;
@@ -135,6 +136,7 @@ class ServerManager
 			{
 				try 
 				{
+					System.out.println("[sendMsgAll] _msg >>> : " + _msg);
 					BufferedWriter bw = new BufferedWriter
 							(new OutputStreamWriter(userList.get(i).getM_socket().getOutputStream()));
 					bw.write(_msg + "\n");
@@ -191,26 +193,30 @@ class ServerManager
 		{
 			try
 			{
+				System.out.println("socket >>> : " + socket);
 				BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 				while(true)
 				{
-					String msg = br.readLine();
-					if(msg != null && msg.length() > 0)
+					if(br != null)
 					{
-						System.out.println("[ReceiverThread.run] msg >>> : " + msg);
-						if(Command.isUserCommand(msg))
+						String msg = br.readLine();
+						if(msg != null && msg.length() > 0)
 						{
-							
-						}
-						else
-						{
-							String text = "[" + id + "]" + " : " + msg; // >>> [닉네임] : (채팅내용)
-							sendMsgAll(text);
+							System.out.println("[ReceiverThread.run] msg >>> : " + msg);
+							if(Command.isUserCommand(msg))
+							{
+								
+							}
+							else
+							{
+								String text = "[" + id + "]" + " : " + msg; // >>> [닉네임] : (채팅내용)
+								sendMsgAll(text);
+							}
 						}
 					}
 				}
 			}
-			catch (Exception e) 
+			catch (IOException e) 
 			{
 				System.out.println("[ReceiverThread.run.catch()] error >>> : " + e);
 				removeUser(socket);
