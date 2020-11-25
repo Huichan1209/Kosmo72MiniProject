@@ -30,9 +30,7 @@ class ServerCommand
 				return true;
 			}
 		}
-		
-		System.out.println("size >>> : " + cmdList.size());
-		
+				
 		return false;
 	}
 }
@@ -61,8 +59,6 @@ class UserCommand
 			}
 		}
 		
-		System.out.println("size >>> : " + cmdList.size());
-		
 		return false;
 	}
 }
@@ -71,50 +67,63 @@ public abstract class Command
 {	
 	public static boolean isServerCommand(String cmd) //유효한 명령어인가?
 	{
-		boolean a = cmd.charAt(0) == '/'; //조건 a : 앞글자가 /로 시작하나
-		if(a)
+		if(cmd != null && cmd.length() > 0)
 		{
-			String[] tempArr = cmd.split(" "); //명령어가 투표 [닉네임] 이런식으로 올 수 있기 때문에 앞에만 뜯어서 유효한 명령어인지 검사
-			cmd = tempArr[0];
-			boolean b = new ServerCommand().isValidCmd(cmd);//조건 b : 프로그램에 등록된 명령어인가 
-			
-			return a && b; //두가지 조건 곱	
+			if(isLikeCommand(cmd))
+			{
+				String[] tempArr = cmd.split(" "); //명령어가 투표 [닉네임] 이런식으로 올 수 있기 때문에 앞에만 뜯어서 유효한 명령어인지 검사
+				cmd = tempArr[0];
+				boolean b = new ServerCommand().isValidCmd(cmd);//조건 b : 프로그램에 등록된 명령어인가 
+				
+				return b;	
+			}
 		}
 		return false;
 	}
 	
 	public static boolean isUserCommand(String cmd) //유효한 명령어인가?
 	{
-		boolean a = cmd.charAt(0) == '/'; //조건 a : 앞글자가 /로 시작하나
-		if(a)
+		if(cmd != null && cmd.length() > 0)
 		{
-			String[] tempArr = cmd.split(" "); //명령어가 투표 [닉네임] 이런식으로 올 수 있기 때문에 앞에만 뜯어서 유효한 명령어인지 검사
-			cmd = tempArr[0];
-			boolean b = new UserCommand().isValidCmd(cmd);//조건 b : 프로그램에 등록된 명령어인가 
-			
-			return a && b; //두가지 조건 곱	
+			if(isLikeCommand(cmd))
+			{
+				String[] tempArr = cmd.split(" "); //명령어가 투표 [닉네임] 이런식으로 올 수 있기 때문에 앞에만 뜯어서 유효한 명령어인지 검사
+				cmd = tempArr[0];
+				boolean b = new UserCommand().isValidCmd(cmd);//조건 b : 프로그램에 등록된 명령어인가 
+				
+				return b;
+			}
 		}
 		return false;
 	}
 	
 	public static boolean isCommand(String cmd) //유효한 명령어인가?
 	{
-		boolean a = cmd.charAt(0) == '/'; //조건 a : 앞글자가 /로 시작하나
-		if(a)
+		if(cmd != null && cmd.length() > 0)
 		{
-			String[] tempArr = cmd.split(" "); //명령어가 투표 [닉네임] 이런식으로 올 수 있기 때문에 앞에만 뜯어서 유효한 명령어인지 검사
-			cmd = tempArr[0];
-			System.out.println("cmd >>> : " + cmd);
-			System.out.println("cmd.length >>> : " + cmd.length());
-			boolean b = new ServerCommand().isValidCmd(cmd);
-			System.out.println("중간");
-			b = b || new UserCommand().isValidCmd(cmd);//조건 b : 프로그램에 등록된 명령어인가 
-			System.out.println("끝");
+			if(isLikeCommand(cmd))
+			{
+				String[] tempArr = cmd.split(" "); //명령어가 투표 [닉네임] 이런식으로 올 수 있기 때문에 앞에만 뜯어서 유효한 명령어인지 검사
+				cmd = tempArr[0];
+				System.out.println("cmd >>> : " + cmd);
+				System.out.println("cmd.length >>> : " + cmd.length());
+				boolean b = new ServerCommand().isValidCmd(cmd);
+				System.out.println("중간");
+				b = b || new UserCommand().isValidCmd(cmd);//조건 b : 프로그램에 등록된 명령어인가 
+				System.out.println("끝");
 
-			return b; //두가지 조건 곱	
+				return b;	
+			}
 		}
-		
-		System.out.println("끝");
+		return false;
+	}
+	
+	public static boolean isLikeCommand(String cmd) //커멘드같이 생겼나? (/로 시작하나)
+	{
+		if(cmd != null && cmd.length() > 0)
+		{
+			return cmd.charAt(0) == '/'; // 앞글자가 /로 시작하나
+		}
 		return false;
 	}
 }

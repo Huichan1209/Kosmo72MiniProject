@@ -193,7 +193,6 @@ class ServerManager
 		{
 			try
 			{
-				System.out.println("socket >>> : " + socket);
 				BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 				while(true)
 				{
@@ -202,7 +201,6 @@ class ServerManager
 						String msg = br.readLine();
 						if(msg != null && msg.length() > 0)
 						{
-							System.out.println("[ReceiverThread.run] msg >>> : " + msg);
 							if(Command.isUserCommand(msg))
 							{
 								

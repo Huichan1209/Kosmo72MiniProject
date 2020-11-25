@@ -224,17 +224,32 @@ public class Client
 	
 	public void sendMsg(String msg)
 	{
-		BufferedWriter bw = null;
-		
-		try
+		if(msg != null && msg.length() > 0)
 		{
-			bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-			bw.write(msg + "\n");
-			bw.flush();
+			//명령어 형식(/로 시작함)이라면 userCommand이거나 유효한 커멘드가 아니어야함
+			if(Command.isLikeCommand(msg) && !Command.isUserCommand(msg))
+			{
+				cf.getGamePanel().appendChat("[잘못된 명령어] : " + msg + "는 유효한 명령어가 아닙니다.");
+			}
+			else
+			{
+				BufferedWriter bw = null;
+				
+				try
+				{
+					bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+					bw.write(msg + "\n");
+					bw.flush();
+				}
+				catch (Exception e) 
+				{
+					System.out.println("error >>> : " + e);
+				}
+			}
 		}
-		catch (Exception e) 
+		else
 		{
-			System.out.println("error >>> : " + e);
+			System.out.println("[Client.sendMsg()] >>> : msg is null");
 		}
 	}
 	
