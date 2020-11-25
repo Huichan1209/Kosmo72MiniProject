@@ -37,6 +37,7 @@ public class GamePanel extends JPanel implements Panel
 	private static JTextField timer; //타이머 TextField
 	private static JTextArea chatTxtArea; //채팅 보여주는 chatTextArea
 	private static JScrollPane scrollPane; //스크롤바
+	private static JScrollPane scrollPane2; //userlist 스크롤바
 	private static JPanel imagePanel; //배경이미지
 	private static Image img = new ImageIcon("./images/background.jpg").getImage();
 	private static Image policeImg = new ImageIcon("./images/police.jpg").getImage();
@@ -267,10 +268,13 @@ public class GamePanel extends JPanel implements Panel
 		userListPanel.setLayout(null);
 
 		userListTA = new JTextArea();
-		userListTA.setBounds(12, 37, 298, 126);
+		//userListTA.setBounds(12, 37, 298, 126);
 		userListTA.setEditable(false);
 		userListPanel.add(userListTA);
-
+		scrollPane2 = new JScrollPane(userListTA, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS , JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		scrollPane2.setBounds(12, 37, 298, 126);
+		userListPanel.add(scrollPane2);
+		
 		textField = new JTextField();
 		textField.setFont(UIManager.getFont("List.font"));
 		textField.setHorizontalAlignment(SwingConstants.CENTER);
