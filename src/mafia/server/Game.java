@@ -265,17 +265,22 @@ class Game
 			}
 		}
 		
+		//2.일치했다면 의사가 살린사람과 죽이려는 사람이 일치하는가? 아니면 죽이기
 		if(isCoinCide)
 		{
 			if(healedId == null)
 			{
-				sm.sendMsgAll("마피아가 누군가를 죽이려했지만, 의사가 살렸습니다.");
+				sm.kill(targetId);
 			}
 			else
 			{
 				if(targetId.equals(healedId)) //의사가 살렸다면
 				{
-					
+					sm.sendMsgAll("마피아가 누군가를 죽이려했지만, 의사가 살렸습니다.");
+				}
+				else
+				{
+					sm.kill(targetId);
 				}
 			}
 		}
@@ -283,6 +288,21 @@ class Game
 		{
 			sm.sendMsgByJob(Job.JOB_MAFIA, "마피아들의 의견이 일치하지 않아 살인이 무효 되었습니다.");
 		}
+		
+		//3.경찰이 조사한거 알려주기
+		if(investigatedId != null && investigatedId.length() > 0)
+		{
+			if(sm.getJobById(investigatedId) == Job.JOB_MAFIA)
+			{
+				//조사한 사람이 마피아가 맞다면
+				sm.sendMsgByJob(Job.JOB_POLICE, targetId + "님은 마피아가 맞습니다.");
+			}
+			else
+			{
+				sm.sendMsgByJob(Job.JOB_POLICE, targetId + "님은 마피아가 아닙니다.");
+			}
+		}
+		
 		//변수 초기화
 		GameManager.isDayTime = false;
 		healedId = null;

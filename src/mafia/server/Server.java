@@ -301,6 +301,7 @@ class ServerManager
 			{
 				userList.get(i).killUser();
 				sendMsg(id, "/ªÁ∏¡");
+				sendMsgAll(id + "¥‘¿Ã ªÁ∏¡«ﬂΩ¿¥œ¥Ÿ.");
 			}
 		}
 	}
