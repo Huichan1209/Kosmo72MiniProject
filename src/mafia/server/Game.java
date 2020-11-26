@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.naming.directory.InvalidSearchControlsException;
+
 import mafia.common.Job;
 
 class GameManager
@@ -58,7 +60,7 @@ class GameManager
 				sm.sendMsgAll("/대화시간시작"); isTalkTime = true;
 				//대화종료 커멘드를 입력받았을때 '외부에서' 타이머 종료 >>> : Timer.stopTimer(timerKey);
 				
-				currentTimerKey = Timer.createTimer(2 * MIN); //2분 대기
+				currentTimerKey = Timer.createTimer(20 * SEC); //2분 대기
 				while(true)
 				{
 					if(!Timer.isAlive(currentTimerKey)) //대화시간이 종료되었으면
@@ -74,13 +76,14 @@ class GameManager
 							{
 								sm.sendMsgAll("/투표시간종료"); isVoteTime = false;
 								
-								sm.sendMsgAll("/밤"); Game.getInstance().endNight();
+								sm.sendMsgAll("/밤"); isDayTime = false;
 								//밤에 할일이 끝나면 (마피아:살인, 의사:치료, 경찰:조사) 타이머 종료 >>> : Timer.stopTimer(timerKey);
 								currentTimerKey = Timer.createTimer(1 * MIN);
 								while(true)
 								{
 									if(!Timer.isAlive(currentTimerKey))
 									{
+										Game.getInstance().endNight();
 										sm.sendMsgAll("/낮"); isDayTime = true;
 										break;
 									}
@@ -235,12 +238,14 @@ class Game
 	
 	public void endNight()
 	{
+		System.out.println("[endNight] 진입");
 		ServerManager sm = Server.getServerManager();
 		
 		//밤동안 일어난 일 처리
 		//1. 마피아들이 죽이려는 대상이 모두 일치했는가
 		boolean isCoinCide = true;
-		String[] values = (String[])murderedIdMap.values().toArray();
+		Object[] values = murderedIdMap.values().toArray();
+		System.out.println("[endNight] values >>> : " + values);
 		String targetId = "";
 		for(int i=0; i<values.length; i++)
 		{
@@ -255,7 +260,7 @@ class Game
 				}
 				else
 				{
-					targetId = values[i];
+					targetId = (String)values[i];
 				}
 			}
 			catch(ArrayIndexOutOfBoundsException ignore)
@@ -264,6 +269,9 @@ class Game
 				break;
 			}
 		}
+		
+		System.out.println("isCoinCide >>> : " + isCoinCide);
+		
 		
 		//2.일치했다면 의사가 살린사람과 죽이려는 사람이 일치하는가? 아니면 죽이기
 		if(isCoinCide)
@@ -304,7 +312,6 @@ class Game
 		}
 		
 		//변수 초기화
-		GameManager.isDayTime = false;
 		healedId = null;
 		investigatedId = null;
 		murderedIdMap.clear();
@@ -382,6 +389,7 @@ class Game
 				if(Job.JOB_DOCTOR == Server.getServerManager().getJobById(my_Id))
 				{
 					healedId = target_Id;
+					Server.getServerManager().sendMsg(my_Id, target_Id + "를 살리기로 마음먹었습니다.");
 				}
 				else
 				{
@@ -404,9 +412,10 @@ class Game
 			if(validation(my_Id, target_Id)) //유효한 id들인지 검사
 			{
 				//조사를 명령한 사람이 경찰인가 검사
-				if(Job.JOB_POLICE == Server.getServerManager().getJobById(target_Id))
+				if(Job.JOB_POLICE == Server.getServerManager().getJobById(my_Id))
 				{
 					investigatedId = target_Id;
+					Server.getServerManager().sendMsg(my_Id, target_Id + "를 조사하기로 마음먹었습니다.");
 				}
 				else
 				{
@@ -429,13 +438,14 @@ class Game
 			if(validation(my_Id, target_Id)) //유효한 id들인지 검사
 			{
 				//살인을 명령한 사람이 마피아인지 검사
-				if(Job.JOB_MAFIA == Server.getServerManager().getJobById(target_Id))
+				if(Job.JOB_MAFIA == Server.getServerManager().getJobById(my_Id))
 				{
 					murderedIdMap.put(my_Id, target_Id);
+					Server.getServerManager().sendMsg(my_Id, target_Id + "를 죽이기로 마음먹었습니다.");
 				}
 				else
 				{
-					Server.getServerManager().sendMsg(my_Id, "[잘못된 명령어] : 조사는 경찰만 할 수 있습니다.");
+					Server.getServerManager().sendMsg(my_Id, "[잘못된 명령어] : 살인은 마피아만 할 수 있습니다.");
 				}
 			}
 			else

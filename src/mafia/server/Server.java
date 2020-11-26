@@ -302,6 +302,7 @@ class ServerManager
 				userList.get(i).killUser();
 				sendMsg(id, "/사망");
 				sendMsgAll(id + "님이 사망했습니다.");
+				sendMsgAll("남은 인원 >>> : " + getAliveUserCnt());
 			}
 		}
 	}
@@ -420,7 +421,7 @@ class ServerManager
 								{
 									if(arg != null && arg.length() > 0)
 									{
-										Game.getInstance().investigate(id, arg);
+										Game.getInstance().murder(id, arg);
 									}
 									else
 									{
@@ -434,13 +435,77 @@ class ServerManager
 								//유저가 서버커멘드를 입력해서 게임을 조종할 수 있기때문에 걸러줌
 								if(!Command.isServerCommand(msg)) 
 								{
-									String text = "[" + id + "]" + " : " + msg; // >>> [닉네임] : (채팅내용)
-									sendMsgAll(text);
+									//명령어가 아닌 일반적인 대화의 경우
+									int job = Server.getServerManager().getJobById(id);
+									System.out.println("job >>> : " + job);
+									switch (job) {
+									case Job.JOB_CITIZEN:
+										
+										if(GameManager.isDayTime)
+										{
+											String text = "[" + id + "]" + " : " + msg; // >>> [닉네임] : (채팅내용)
+											sendMsgAll(text);
+										}
+										else
+										{
+											String text = "밤에는 대화할 수 없습니다";
+											sendMsg(id, text);
+										}
+										break;
+										
+									case Job.JOB_POLICE:
+										
+										if(GameManager.isDayTime)
+										{
+											String text = "[" + id + "]" + " : " + msg; // >>> [닉네임] : (채팅내용)
+											sendMsg(id, text);
+										}
+										else
+										{
+											String text = "밤에는 대화할 수 없습니다";
+											sendMsg(id, text);
+										}
+										break;
+										
+									case Job.JOB_DOCTOR:
+										
+										if(GameManager.isDayTime)
+										{
+											String text = "[" + id + "]" + " : " + msg; // >>> [닉네임] : (채팅내용)
+											sendMsgAll(text);
+										}
+										else
+										{
+											String text = "밤에는 대화할 수 없습니다";
+											sendMsg(id, text);
+										}
+										break;
+										
+									case Job.JOB_MAFIA:
+										
+										if(GameManager.isDayTime)
+										{
+											String text = "[" + id + "]" + " : " + msg; // >>> [닉네임] : (채팅내용)
+											sendMsgAll(text);
+										}
+										else
+										{
+											String text = "[" + id + "(마피아)]" + " : " + msg; // >>> [닉네임] : (채팅내용)
+											sendMsgByJob(Job.JOB_MAFIA, text);
+										}
+										break;
+										
+									default:
+										System.out.println("[ReceiverThread.run.else] error job >>> : " + job);
+										break;
+									}
+									
+
 								}
 								else
 								{
 									System.out.println("[ReceiverThread.run()] error >>> : 유저가 서버커멘드를 입력함");
-								}
+								}	
 							}
 						}
 					}
