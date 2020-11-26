@@ -21,7 +21,7 @@ import mafia.server.UserVO;
 
 public class ClientFrame extends JFrame
 {
-	private static ClientFrame clientFrame;
+	private static ClientFrame clientFrame = new ClientFrame();
 	private static LoginPanel loginPanel;
 	private static LoadingPanel loadingPanel;
 	private static GamePanel gamePanel;
@@ -37,27 +37,16 @@ public class ClientFrame extends JFrame
 		setVisible(true);
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		JButton loginBtn = new JButton("·Î±×ÀÎ");
-		loginBtn.addActionListener
-		(
-			new ActionListener() 
-			{
-				@Override
-				public void actionPerformed(ActionEvent e) 
-				{
-					change(gamePanel);
-				}
-			}
-		);
-		add(loginBtn, BorderLayout.SOUTH);
-		pack();
 		setIconImage(getToolkit().createImage("./images/frameIcon.jpg"));
 				
 	}
 	
-	public ClientFrame getInstance()
+	public static ClientFrame getInstance()
 	{
-		clientFrame = this;
+		if(clientFrame == null)
+		{
+			clientFrame = new ClientFrame();
+		}
 		return clientFrame;
 	}
 	

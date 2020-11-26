@@ -80,6 +80,8 @@ class ServerManager
     	   if(userList.get(i).getM_socket() == socket)
     	   {
     		   System.out.println(userList.get(i).getM_Id() + "유저리스트에서 제거");
+    		   sendMsgAll(userList.get(i).getM_Id() + "님이 나가셨습니다.");
+    		   kill(userList.get(i).getM_Id());
     		   userList.remove(i);
                receiveThreadList.get(i).interrupt();;
                receiveThreadList.remove(i);
@@ -216,6 +218,19 @@ class ServerManager
 		return (String[])idStack.toArray();
 	}
 	
+	public boolean isAlive(String id)
+	{
+		for(int i=0; i<userList.size(); i++)
+		{
+			boolean isTarget = (id.equals(userList.get(i).getM_Id()));
+			if(isTarget)
+			{
+				return userList.get(i).isAlive();
+			}
+		}
+		return false;
+	}
+	
 	//특정 id를 가진 유저에게만 메시지 전송
 	public void sendMsg(String _id, String _msg)
 	{
@@ -304,6 +319,25 @@ class ServerManager
 				sendMsgAll(id + "님이 사망했습니다.");
 				sendMsgAll("남은 인원 >>> : " + getAliveUserCnt());
 			}
+		}
+		
+		//마피아가 모두 죽었다면
+		if(getAliveMafiaCnt() == 0)
+		{
+			sendMsgAll("모든 마피아가 사망했습니다.");
+			sendMsgAll("시민팀 승리 !");
+			sendMsgAll("/게임종료");
+			GameManager.isGaming = false;
+			Timer.stopTimer(Game.getGameManager().getCurrentTimerKey());
+		}
+		//마피아만 남았다면
+		else if(getAliveUserCnt() - getAliveMafiaCnt() == 0)
+		{
+			sendMsgAll("모든 시민팀이 사망했습니다.");
+			sendMsgAll("마피아 승리 !");
+			sendMsgAll("/게임종료");
+			GameManager.isGaming = false;
+			Timer.stopTimer(Game.getGameManager().getCurrentTimerKey());
 		}
 	}
 	

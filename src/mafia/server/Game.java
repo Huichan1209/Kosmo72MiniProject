@@ -60,28 +60,28 @@ class GameManager
 				sm.sendMsgAll("/대화시간시작"); isTalkTime = true;
 				//대화종료 커멘드를 입력받았을때 '외부에서' 타이머 종료 >>> : Timer.stopTimer(timerKey);
 				
-				currentTimerKey = Timer.createTimer(20 * SEC); //2분 대기
-				while(true)
+				currentTimerKey = Timer.createTimer(2 * MIN); //2분 대기
+				while(isGaming)
 				{
-					if(!Timer.isAlive(currentTimerKey)) //대화시간이 종료되었으면
+					if(!Timer.isAlive(currentTimerKey) && isGaming) //대화시간이 종료되었으면
 					{
 						sm.sendMsgAll("/대화시간종료"); isTalkTime = false;
 						
 						sm.sendMsgAll("/투표시간시작"); isVoteTime = true;
 						//투표종료 커멘드를 입력받았을때 '외부에서' 타이머 종료 >>> : Timer.stopTimer(timerKey);
 						currentTimerKey = Timer.createTimer(30 * SEC);
-						while(true)
+						while(isGaming)
 						{
-							if(!Timer.isAlive(currentTimerKey))
+							if(!Timer.isAlive(currentTimerKey) && isGaming)
 							{
 								sm.sendMsgAll("/투표시간종료"); isVoteTime = false;
 								
 								sm.sendMsgAll("/밤"); isDayTime = false;
 								//밤에 할일이 끝나면 (마피아:살인, 의사:치료, 경찰:조사) 타이머 종료 >>> : Timer.stopTimer(timerKey);
 								currentTimerKey = Timer.createTimer(1 * MIN);
-								while(true)
+								while(isGaming)
 								{
-									if(!Timer.isAlive(currentTimerKey))
+									if(!Timer.isAlive(currentTimerKey) && isGaming)
 									{
 										Game.getInstance().endNight();
 										sm.sendMsgAll("/낮"); isDayTime = true;
@@ -103,7 +103,6 @@ class GameManager
 	}//end of Game()
 }
 
-
 class Game
 {	
 	private static Game inst = new Game();
@@ -113,7 +112,8 @@ class Game
 	private static Map<String, Integer> voteCntMap = new HashMap<String, Integer>(); //투표당한 수 ex)(닉네임1 : 3)
 	private static String healedId = null; //치료받은 유저 id
 	private static String investigatedId = null; //조사받은 유저 id
-	private static Map<String, String> murderedIdMap = new HashMap<String, String>(); //살해당할 타겟으로 지목된 유저 id들 (마피아는 여러명일수도 있기 때문에 각자 지목한 걸 List에 담고 의견이 모두 일치하면 죽인다.)
+	private static String murderedId1 = null; //마피아1이 죽일사람
+	private static String murderedId2 = null; //마피아2가 죽일사람
 	
 	public Game()
 	{
@@ -244,31 +244,14 @@ class Game
 		//밤동안 일어난 일 처리
 		//1. 마피아들이 죽이려는 대상이 모두 일치했는가
 		boolean isCoinCide = true;
-		Object[] values = murderedIdMap.values().toArray();
-		System.out.println("[endNight] values >>> : " + values);
-		String targetId = "";
-		for(int i=0; i<values.length; i++)
+		if(murderedId2 != null)
 		{
-			try
-			{
-				if(!values[i].equals(values[i+1]))
-				{
-					//일치하지 않는 값이 발견됬을때만 false
-					System.out.println("[endNight()] values[i] >>> : " + values[i]);
-					System.out.println("[endNight()] values[i+1] >>> : " + values[i+1]);
-					isCoinCide = false;
-				}
-				else
-				{
-					targetId = (String)values[i];
-				}
-			}
-			catch(ArrayIndexOutOfBoundsException ignore)
-			{
-				//for문 종료
-				break;
-			}
+			isCoinCide = murderedId1.equals(murderedId2);
 		}
+		
+		System.out.println("[endNight] murderedId1 >>> : " + murderedId1);
+		System.out.println("[endNight] murderedId2 >>> : " + murderedId2);
+		String targetId = murderedId1;
 		
 		System.out.println("isCoinCide >>> : " + isCoinCide);
 		
@@ -314,7 +297,8 @@ class Game
 		//변수 초기화
 		healedId = null;
 		investigatedId = null;
-		murderedIdMap.clear();
+		murderedId1 = null;
+		murderedId2 = null;
 	}
 	
 	//투표
@@ -375,6 +359,10 @@ class Game
 				System.out.println("[Game.vote()] error, my_Id >>> : " + my_Id + ", target_Id >>> : " + target_Id);
 			}
 		}
+		else
+		{
+			Server.getServerManager().sendMsg(my_Id, "투표는 투표시간에만 할 수 있습니다.");
+		}
 	}
 	
 	//치료
@@ -400,6 +388,10 @@ class Game
 			{
 				System.out.println("[Game.vote()] error, my_Id >>> : " + my_Id + ", target_Id >>> : " + target_Id);
 			}
+		}
+		else
+		{
+			Server.getServerManager().sendMsg(my_Id, "치료는 밤에만 할 수 있습니다.");
 		}
 	}
 	
@@ -427,6 +419,10 @@ class Game
 				System.out.println("[Game.vote()] error, my_Id >>> : " + my_Id + ", target_Id >>> : " + target_Id);
 			}
 		}
+		else
+		{
+			Server.getServerManager().sendMsg(my_Id, "조사는 밤에만 할 수 있습니다.");
+		}
 	}
 	
 	//살인
@@ -440,8 +436,22 @@ class Game
 				//살인을 명령한 사람이 마피아인지 검사
 				if(Job.JOB_MAFIA == Server.getServerManager().getJobById(my_Id))
 				{
-					murderedIdMap.put(my_Id, target_Id);
-					Server.getServerManager().sendMsg(my_Id, target_Id + "를 죽이기로 마음먹었습니다.");
+					if(Server.getServerManager().isAlive(target_Id))
+					{
+						if(murderedId1 == null)
+						{
+							murderedId1 = target_Id;
+						}
+						else
+						{
+							murderedId2 = target_Id;
+						}
+						Server.getServerManager().sendMsg(my_Id, target_Id + "를 죽이기로 마음먹었습니다.");
+					}
+					else
+					{
+						Server.getServerManager().sendMsg(my_Id, "이미 사망한 사람은 죽일 수 없습니다.");
+					}
 				}
 				else
 				{
@@ -452,6 +462,10 @@ class Game
 			{
 				System.out.println("[Game.vote()] error, my_Id >>> : " + my_Id + ", target_Id >>> : " + target_Id);
 			}
+		}
+		else
+		{
+			Server.getServerManager().sendMsg(my_Id, "낮에는 사람을 죽일 수 없습니다.");
 		}
 	}
 	

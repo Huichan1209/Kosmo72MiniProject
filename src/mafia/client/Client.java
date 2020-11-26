@@ -24,7 +24,7 @@ public class Client
 	public static boolean isGaming = false; //게임중인가를 나타내는 상태변수 (외부에서 참조가능)
 	public static boolean isDaytime = true; //낮인가
 	public static boolean isTalkTime = false; //대화시간인가
-	public static boolean isVoteTime = false; //투표 시간인가
+	public static boolean isVoteTime = false; //투표시간인가
 	public static int dayCnt = 1; //몇일차인가
 	
 	public Client()
@@ -327,7 +327,7 @@ public class Client
 	
 	public void setClientScr()
 	{
-		cf = new ClientFrame().getInstance();
+		cf = ClientFrame.getInstance();
 		new Thread(new LocalTimer()).start();
 	}
 	
