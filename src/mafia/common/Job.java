@@ -17,6 +17,11 @@ public class Job {
 	public static final String NAME_DOCTOR = "의사";
 	public static final String NAME_MAFIA = "마피아";
 	
+	public static final int CNT_CITIZEN = 4;
+	public static final int CNT_POLICE = 1;
+	public static final int CNT_DOCTOR = 1;
+	public static final int CNT_MAFIA = 2;
+	
 	public static String getNameByIdx(int jobIdx)
 	{
 		HashMap<Integer, String> jobMap = new HashMap<Integer, String>();
@@ -31,8 +36,8 @@ public class Job {
 	//직업배열 렌덤 리턴
 	public static void setRandomJOB_Arr(List<UserVO> userList)
 	{		
-		int cMax = 4; int pMax = 1; int dMax = 1; int mMax = 2;
-		int cCnt = 0; int pCnt = 0; int dCnt = 0; int mCnt = 0;
+		int cMax = CNT_CITIZEN; int pMax = CNT_POLICE; int dMax = CNT_DOCTOR; int mMax = CNT_MAFIA;
+		int cCnt = 0; 			int pCnt = 0; 		   int dCnt = 0; 		  int mCnt = 0;
 		
 		int maxSum = (cMax + pMax + dMax + mMax);
 		

@@ -187,6 +187,35 @@ class ServerManager
 		return cnt;
 	}
 	
+	public int getAliveCntByJob(int job)
+	{
+		int cnt = 0;
+		for(int i=0; i<userList.size(); i++)
+		{
+			boolean isTarget = (userList.get(i).getJob() == job && userList.get(i).isAlive());
+			if(isTarget)
+			{
+				cnt++;
+			}
+		}
+		return cnt;
+	}
+	
+	public String[] getAliveIdArrByJob(int job)
+	{
+		ArrayList<String> idStack = new ArrayList<String>();
+		for(int i=0; i<userList.size(); i++)
+		{
+			boolean isTarget = (job == userList.get(i).getJob() && userList.get(i).isAlive());
+			if(isTarget)
+			{
+				idStack.add(userList.get(i).getM_Id());
+			}
+		}
+		
+		return (String[])idStack.toArray();
+	}
+	
 	//특정 id를 가진 유저에게만 메시지 전송
 	public void sendMsg(String _id, String _msg)
 	{
