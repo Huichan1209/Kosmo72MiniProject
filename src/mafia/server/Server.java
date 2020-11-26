@@ -67,6 +67,9 @@ class ServerManager
 			System.out.println("유저가 가득차서 유저를 입장시킬 수 없음");
 			userVO.closeUserSocket(); //유저 내보내기
 		}
+		
+		System.out.println("UserList.size >>> : " + userList.size());
+		System.out.println("receiveThreadList.size >>> : " + receiveThreadList.size());
 	}
 	
 	//유저가 나갔을 때 
@@ -214,7 +217,7 @@ class ServerManager
 						{
 							if(Command.isUserCommand(msg))
 							{
-								System.out.println("유저명령어 발견");
+								System.out.println("유저명령어 발견 >>> : " + msg);
 								System.out.println("id >>> : " + id);
 								/*
 								 ex) msg : /살인 [닉네임1]
@@ -223,8 +226,21 @@ class ServerManager
 								*/
 								
 								String cmd = msg.split(" ")[0];
-								String arg = msg.split(" ")[1];
-				
+								String arg = null;
+								try
+								{
+									if(msg.split(" ").length > 1)
+									{
+										System.out.println("msg.split(\" \").length >>> : " + msg.split(" ").length);
+										arg = msg.split(" ")[1];
+									}
+								}
+								catch (ArrayIndexOutOfBoundsException e) 
+								{
+									System.out.println("arg is null");
+									sendMsg(id, "[잘못된 명령어] : 닉네임이 유효하지 않습니다. 정확히 입력해주세요");
+								}
+								
 								if(cmd.equals("/대화종료"))
 								{
 									Game.getInstance().endTalk();
@@ -235,19 +251,51 @@ class ServerManager
 								}
 								else if(cmd.equals("/투표"))
 								{
-									Game.getInstance().vote(id, arg);
+									if(arg != null && arg.length() > 0)
+									{
+										Game.getInstance().vote(id, arg);
+									}
+									else
+									{
+										System.out.println("[투표] arg가 유효하지 않음 arg >>> : " + arg);
+										sendMsg(id, "[잘못된 명령어] : 닉네임이 유효하지 않습니다. 정확히 입력해주세요");
+									}
 								}
 								else if(cmd.equals("/치료"))
 								{
-									Game.getInstance().heal(id, arg);
+									if(arg != null && arg.length() > 0)
+									{
+										Game.getInstance().heal(id, arg);
+									}
+									else
+									{
+										System.out.println("[치료] arg가 유효하지 않음 arg >>> : " + arg);
+										sendMsg(id, "[잘못된 명령어] : 닉네임이 유효하지 않습니다. 정확히 입력해주세요");
+									}
 								}
 								else if(cmd.equals("/조사"))
 								{
-									Game.getInstance().investigate(id, arg);
+									if(arg != null && arg.length() > 0)
+									{
+										Game.getInstance().investigate(id, arg);
+									}
+									else
+									{
+										System.out.println("[치료] arg가 유효하지 않음 arg >>> : " + arg);
+										sendMsg(id, "[잘못된 명령어] : 닉네임이 유효하지 않습니다. 정확히 입력해주세요");
+									}
 								}
 								else if(cmd.equals("/살인"))
 								{
-									Game.getInstance().murder(id, arg);
+									if(arg != null && arg.length() > 0)
+									{
+										Game.getInstance().investigate(id, arg);
+									}
+									else
+									{
+										System.out.println("[살인] arg가 유효하지 않음 arg >>> : " + arg);
+										sendMsg(id, "[잘못된 명령어] : 닉네임이 유효하지 않습니다. 정확히 입력해주세요");
+									}								
 								}
 							}
 							else
