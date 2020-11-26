@@ -18,6 +18,7 @@ class ServerCommand
 		cmdList.add("/유저리스트"); //클라이언트한테 유저리스트전달 : /유저리스트 [닉네임1,닉네임2,닉네임3]
 		cmdList.add("/게임시작"); //클라이언트한테 게임시작을 알림 : /게임시작
 		cmdList.add("/게임종료"); //클라이언트한테 게임종료를 알림 : /게임종료
+		cmdList.add("/사망"); //클라이언트한테 사망했음을 알림 : /사망 [닉네임]
 	}
 	
 	public boolean isValidCmd(String cmd)

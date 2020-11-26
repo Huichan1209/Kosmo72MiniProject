@@ -9,14 +9,12 @@ public class UserVO {
 	private String m_Id; //유저 아이디
 	private Date entry_time; //유저 입장한 시간
 	private int job; //직업
-	
-	private boolean isAliveVar = false; //살아있나
+	private boolean isAliveVar = true; //유저가 살아있나(상태)
 	
 	
 	public UserVO()
 	{
 		System.out.println("[경고] UserVO 기본 생성자로 객체화됨");
-		isAliveVar = true;
 	}//default Constructor
 	
 	public UserVO(Socket m_socket, String m_Id, Date entry_time, int job) 
@@ -25,13 +23,16 @@ public class UserVO {
 		this.m_Id = m_Id;
 		this.entry_time = entry_time;
 		this.job = job;
-		
-		isAliveVar = true;
 	}
 
 	public boolean isAlive()
 	{
 		return isAliveVar;
+	}
+	
+	public void killUser()
+	{
+		isAliveVar = false;
 	}
 		
 	public void closeUserSocket()

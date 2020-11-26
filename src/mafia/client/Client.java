@@ -2,10 +2,15 @@ package mafia.client;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
 
 import mafia.common.Command;
 import mafia.common.Job;
@@ -15,6 +20,7 @@ public class Client
 	private static Client c = new Client();
 	private static Socket socket;
 	private static ClientFrame cf;
+	public static boolean isAlive = true; //살아있나
 	public static boolean isGaming = false; //게임중인가를 나타내는 상태변수 (외부에서 참조가능)
 	public static boolean isDaytime = true; //낮인가
 	public static boolean isTalkTime = false; //대화시간인가
@@ -118,6 +124,14 @@ public class Client
 		cf.getGamePanel().appendChat("게임이 종료되었습니다!");
 	}
 	
+	public void dead()
+	{
+		System.out.println("[Dead]");
+		cf.getGamePanel().appendChat("사망했습니다.");
+		isAlive = false;
+		//죽는소리 재생 구현
+	}
+	
 	class ClientReceiveThread implements Runnable 
 	{
 		private Socket socket;
@@ -201,6 +215,10 @@ public class Client
 							{
 								endGame();
 							}
+							else if(cmd.equals("/사망"))
+							{
+								dead();
+							}
 							else
 							{
 								System.out.println("알수없는 명령어 cmd >>> : " + cmd);
@@ -224,32 +242,39 @@ public class Client
 	
 	public void sendMsg(String msg)
 	{
-		if(msg != null && msg.length() > 0)
+		if(isAlive)
 		{
-			//명령어 형식(/로 시작함)이라면 userCommand이거나 유효한 커멘드가 아니어야함
-			if(Command.isLikeCommand(msg) && !Command.isUserCommand(msg))
+			if(msg != null && msg.length() > 0)
 			{
-				cf.getGamePanel().appendChat("[잘못된 명령어] : " + msg + "는 유효한 명령어가 아닙니다.");
+				//명령어 형식(/로 시작함)이라면 userCommand이거나 유효한 커멘드가 아니어야함
+				if(Command.isLikeCommand(msg) && !Command.isUserCommand(msg))
+				{
+					cf.getGamePanel().appendChat("[잘못된 명령어] : " + msg + "는 유효한 명령어가 아닙니다.");
+				}
+				else
+				{
+					BufferedWriter bw = null;
+					
+					try
+					{
+						bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+						bw.write(msg + "\n");
+						bw.flush();
+					}
+					catch (Exception e) 
+					{
+						System.out.println("error >>> : " + e);
+					}
+				}
 			}
 			else
 			{
-				BufferedWriter bw = null;
-				
-				try
-				{
-					bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-					bw.write(msg + "\n");
-					bw.flush();
-				}
-				catch (Exception e) 
-				{
-					System.out.println("error >>> : " + e);
-				}
+				System.out.println("[Client.sendMsg()] >>> : msg is null");
 			}
 		}
 		else
 		{
-			System.out.println("[Client.sendMsg()] >>> : msg is null");
+			cf.getGamePanel().appendChat("죽은사람은 말을 할 수 없습니다.");
 		}
 	}
 	

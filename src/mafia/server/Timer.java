@@ -28,20 +28,24 @@ abstract class Timer
 		timerMap.put(key, timer);
 		remainTimeMap.put(key, time);
 		
+		System.out.println("[removeTimer] 완료. 현재 돌고있는 쓰레드 수 >>> : " + timerMap.size()); 
 		return key;
 	}
 	
 	public static void stopTimer(UUID key)
 	{
-		System.out.println("[stopTimer]");
-		if(timerMap.get(key) != null)
+		if(key != null)
 		{
-			timerMap.get(key).interrupt();
-			removeTimer(key);
-		}
-		else
-		{
-			System.out.println("[stopTimer] Thread is null");
+			System.out.println("[stopTimer]");
+			if(timerMap.get(key) != null)
+			{
+				timerMap.get(key).interrupt();
+				removeTimer(key);
+			}
+			else
+			{
+				System.out.println("[stopTimer] Thread is null");
+			}
 		}
 	}
 	
@@ -49,7 +53,7 @@ abstract class Timer
 	{
 		try
 		{
-			System.out.println("[removeTimer] 진입, Length >>> : " + timerMap.size());
+			System.out.println("[removeTimer] 진입");
 			if(timerMap.get(key) != null)
 			{
 				timerMap.remove(key);
@@ -59,7 +63,7 @@ abstract class Timer
 			{
 				System.out.println("[removeTimer] key가 유효하지 않음");
 			}
-
+			System.out.println("[removeTimer] 완료. 현재 돌고있는 쓰레드 수 >>> : " + timerMap.size()); 
 		}
 		catch (NullPointerException e) 
 		{
@@ -69,14 +73,19 @@ abstract class Timer
 	
 	public static boolean isAlive(UUID key)
 	{
-		if(timerMap.get(key) != null)
+		if(key != null)
 		{
-			return timerMap.get(key).isAlive();
+			try
+			{
+				return timerMap.get(key).isAlive();
+			}
+			catch (NullPointerException e) 
+			{
+				System.out.println("타이머가 존재하지 않음");
+				return false;
+			}
 		}
-		else
-		{
-			return false;
-		}
+		return false;
 	}
 	
 	public static void setRemainTime(UUID key, int remainTime)

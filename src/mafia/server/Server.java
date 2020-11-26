@@ -112,6 +112,79 @@ class ServerManager
 	public void setJobs()
 	{
 		Job.setRandomJOB_Arr(userList);
+		System.out.println("시민 >>> : " + getAliveCitizenCnt());
+		System.out.println("경찰 >>> : " + getAlivePoliceCnt());
+		System.out.println("의사 >>> : " + getAliveDoctorCnt());
+		System.out.println("마피아 >>> : " + getAliveMafiaCnt());
+	}
+	
+	public int getAliveUserCnt() //살아있는 전체 유저 수
+	{
+		int cnt = 0;
+		for(int i=0; i<userList.size(); i++)
+		{
+			if(userList.get(i).isAlive())
+			{
+				cnt++;
+			}
+		}
+		return cnt;
+	}
+	
+	public int getAliveCitizenCnt() //살아남은 시민 수
+	{
+		int cnt = 0;
+		for(int i=0; i<userList.size(); i++)
+		{
+			//직업이 시민이면서 살이있는 경우
+			if(userList.get(i).getJob() == Job.JOB_CITIZEN && userList.get(i).isAlive())
+			{
+				cnt++;
+			}
+		}
+		return cnt;
+	}
+	
+	public int getAlivePoliceCnt()
+	{
+		int cnt = 0;
+		for(int i=0; i<userList.size(); i++)
+		{
+			//직업이 경찰이면서 살이있는 경우
+			if(userList.get(i).getJob() == Job.JOB_POLICE && userList.get(i).isAlive())
+			{
+				cnt++;
+			}
+		}
+		return cnt;
+	}
+	
+	public int getAliveDoctorCnt()
+	{
+		int cnt = 0;
+		for(int i=0; i<userList.size(); i++)
+		{
+			//직업이 의사이면서 살이있는 경우
+			if(userList.get(i).getJob() == Job.JOB_DOCTOR && userList.get(i).isAlive())
+			{
+				cnt++;
+			}
+		}
+		return cnt;
+	}
+	
+	public int getAliveMafiaCnt()
+	{
+		int cnt = 0;
+		for(int i=0; i<userList.size(); i++)
+		{
+			//직업이 마피아이면서 살이있는 경우
+			if(userList.get(i).getJob() == Job.JOB_MAFIA && userList.get(i).isAlive())
+			{
+				cnt++;
+			}
+		}
+		return cnt;
 	}
 	
 	//특정 id를 가진 유저에게만 메시지 전송
@@ -190,6 +263,34 @@ class ServerManager
 		}
 	}
 	
+	public void kill(String id)
+	{
+		for(int i=0; i<userList.size(); i++)
+		{
+			boolean isTarget = (userList.get(i).getM_Id().equals(id));
+			if(isTarget)
+			{
+				userList.get(i).killUser();
+				sendMsg(id, "/사망");
+			}
+		}
+	}
+	
+	public int getJobById(String id)
+	{
+		for(int i=0; i<userList.size(); i++)
+		{
+			boolean isTarget = (userList.get(i).getM_Id().equals(id));
+			if(isTarget)
+			{
+				return userList.get(i).getJob();
+			}
+		}
+		
+		System.out.println("[getJobById] error");
+		return 0;
+	}
+	
 	class ReceiverThread implements Runnable
 	{
 		private Socket socket;
@@ -243,11 +344,11 @@ class ServerManager
 								
 								if(cmd.equals("/대화종료"))
 								{
-									Game.getInstance().endTalk();
+									Game.getInstance().endTalk(id);
 								}
 								else if(cmd.equals("/투표종료"))
 								{
-									Game.getInstance().endVote();
+									Game.getInstance().endVote(id);
 								}
 								else if(cmd.equals("/투표"))
 								{
@@ -344,7 +445,7 @@ public class Server
 		UserVO uVO = new UserVO();
 		uVO.setM_socket(socket);
 		//유니크한 규칙을 아직 확정하지 못해서 임시로 user + 시간으로 해놓았음
-		String id = "user" + new SimpleDateFormat("HHmmssSSS").format(new Date()); //유니크한 UserId 생성
+		String id = "user" + new SimpleDateFormat("ssSSS").format(new Date()); //유니크한 UserId 생성
 		uVO.setM_Id(id);
 		uVO.setEntry_time(new Date());
 		return uVO;
@@ -360,10 +461,6 @@ public class Server
 			System.out.println(socket.getRemoteSocketAddress() + " : 연결");
 			UserVO uVO = Server.getUserVO(socket); //UserVO 생성
             sm.addUser(uVO);
-            if(uVO.isAlive())
-            {
-                //sm.sendMsg(uVO.getM_Id(), "서버에서 할당한 나의 id >>> : " + uVO.getM_Id());
-            }
 		}
 		System.out.println("while문 빠져나옴 (유저가 " + sm.USER_MAX + "명 만큼 들어옴)");
 		System.out.println("isRoomFull >>> : " + sm.isRoomFull());
